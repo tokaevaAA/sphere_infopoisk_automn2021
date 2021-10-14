@@ -27,13 +27,11 @@ void write2predstavlenie_of7bit(int flag, char a, std::vector<char>& buffer){
 
 
 void write2predstavlenie_anynum(int a, std::vector<char>& buffer){
-    if (a<=127){
-        write2predstavlenie_of7bit(1, a, buffer);
-    }
-    else{
+    while (a > 127) {
         write2predstavlenie_of7bit(0, a%128, buffer);
-        write2predstavlenie_of7bit(1, a>>7, buffer);
+        a = a >> 7;
     }
+    write2predstavlenie_of7bit(1, a, buffer);
 }
 
 
@@ -183,7 +181,7 @@ Node<T>* create_subtree(std::string stroka, std::unordered_map<std::string,std::
     if (ind_oper==std::string::npos && ind_otkr==std::string::npos){
 	std::string new_stroka=*(stroka[0]!='!'?std::lower_bound(v.begin(),v.end(),stroka):std::lower_bound(v.begin(),v.end(),stroka.substr(1,stroka.size()-1)));
 	
-        
+        std::cout << new_stroka << std::endl;
         
         T tek_oper=(stroka[0]!='!'?T(2,new_stroka,&my_index[new_stroka]):T(3,new_stroka,&my_index[new_stroka]));
         return new Node<T>(tek_oper,nullptr,nullptr);
@@ -259,10 +257,20 @@ std::tuple<std::unordered_map<std::string,std::vector<int> >, std::vector<std::s
         int buf_size;
         //fin>>buf_size;
         fscanf(fin, "%d",&buf_size);
-        //std::cout<<"buf_size="<<buf_size<<std::endl;
         
+        //std::cout<<"buf_size="<<buf_size<<std::endl;
+
+
+        //----------------CHANGE 1--------------------
+        char aaa;
+        fscanf(fin, "%c", &aaa);
+        //-------------END OF CHANGE 1----------------
+
         //std::cout<<"AAAaAAAA"<<std::endl;
-        std::vector<char> buffer(buf_size);
+
+        //----------------CHANGE 2 ( instead of std::vector<char> buffer(buf_size); )---
+        std::vector<char> buffer;
+        //------------END OF CHANGE 2---------------------------------------------------
         for (int i=0; i<buf_size; i=i+1){
             //fin>>el;
             char tekchar;
@@ -271,8 +279,12 @@ std::tuple<std::unordered_map<std::string,std::vector<int> >, std::vector<std::s
             //printf("k=%d\n",k);
             buffer.push_back(tekchar);
         }
+
+        
+
         char tekchar;
         fscanf(fin, "%c",&tekchar);
+        // buffer.push_back(tekchar);
         //std::cout<<"BBBBBb"<<std::endl;
         //std::vector<char> v(buf_size);
         //for (int j = 0; j < buf_size; ++j) {v[j] = (char)(buffer[j]);}
@@ -456,9 +468,9 @@ int main(){
     
 
 
-    //std::string zapros="(власти & (бельгии | парижа)) & !теракт";
-    //std::string zapros="путин & медведев";
-    std::string zapros="путин & (медведев | (бельгии | парижа))";
+    //std::string zapros="(власти & (бельгии | парижа)) | теракт";
+    std::string zapros="путин & медведев";
+    //std::string zapros="путин & (медведев | (бельгии | парижа))";
     //std::string zapros="участников & митинга";
     //std::string zapros="(участников & митинга) | бренда";
     
@@ -487,6 +499,7 @@ int main(){
     std::cout<<zapros<<std::endl;
     std::cout<<res.size()<<std::endl;
     for (auto el:res){
+        //std::cout << el << std::endl;
 	    std::cout<<my_doc_id2url[el]<<std::endl;
     }
     

@@ -161,37 +161,51 @@ Node<T>* create_subtree(std::string stroka, std::unordered_map<std::string,std::
 }
 
 
-std::tuple<std::unordered_map<std::string,std::vector<int> >, std::vector<std::string>> read_myindex(std::ifstream& fin){
+std::tuple<std::unordered_map<std::string,std::vector<int> >, std::vector<std::string>> read_myindex(FILE* fin){
     std::unordered_map<std::string,std::vector<int> > my_index;
     std::vector<std::string> my_doc_id2url;
 
     
-    
-    
     int amt_docs;
-    fin>>amt_docs;
+    //fin>>amt_docs;
+    fscanf(fin, "%d",&amt_docs);
     std::cout<<"amt_docs="<<amt_docs<<std::endl;
     my_doc_id2url.resize(amt_docs);
-    int cnt=0;
+    
     for (std::string& tek_url: my_doc_id2url){
-        fin>>tek_url;
+        //fin>>tek_url;
+        char tekstring[1000];
+        fscanf(fin, "%s", tekstring);
+        //printf("%s\n",tekchar);
+        tek_url=std::string(tekstring);
+        //tek_url.push_back(tekchar);
+        
+        //std::cout<<tek_url<<std::endl;
     }
     
     
     int amt_tokens;
-    fin>>amt_tokens;
+    fscanf(fin, "%d",&amt_tokens);
+    
     std::cout<<"amt_tokens="<<amt_tokens<<std::endl;
     for (int i=0; i<amt_tokens; i=i+1){
         std::string tek_token;
-        fin>>tek_token;
-        //std::cout<<"tek_token="<<tek_token<<std::endl;
-        int tek_amt_docs;
-        fin>>tek_amt_docs;
-	//std::cout<<"tek_amt_docs="<<tek_amt_docs<<std::endl;
-        my_index[tek_token]=std::vector<int>(tek_amt_docs);
-        for (int& tek_doc: my_index[tek_token]){
-            fin>>tek_doc;
+        char tekstring[1000];
+        fscanf(fin, "%s", tekstring);
+        tek_token=std::string(tekstring);
+        int buf_size;
+        fscanf(fin, "%d",&buf_size);
+        std::vector<int> buffer(buf_size);
+        for (int i=0; i<buf_size; i=i+1){
+            int tekchar;
+            int k;
+            k=fscanf(fin, "%d",&tekchar);
+            buffer.push_back(tekchar);
         }
+        char tekchar;
+        fscanf(fin, "%c",&tekchar);
+        my_index[tek_token]=buffer;
+        
     }
     return std::make_tuple(my_index, my_doc_id2url);
 
@@ -352,11 +366,14 @@ int main(){
     
     
 
-    std::ifstream fin("indexNotCompress.txt");
+    //std::ifstream fin("indexNotCompress.txt");
+    FILE* fin=fopen("indexNotCompress.txt","r");
     std::unordered_map<std::string,std::vector<int> > my_index;
     std::vector<std::string> my_doc_id2url;
     
     std::tie(my_index, my_doc_id2url) = read_myindex(fin);
+    fclose(fin);
+    
     std::vector<std::string> v;    
     for( const auto& [key, value] : my_index ) {
 	v.push_back(key);
@@ -365,8 +382,8 @@ int main(){
     std::cout<<"SizeMyindex="<<v.size()<<std::endl;
 
 
-    std::string zapros="(власти & (бельгии | парижа)) & !теракт";
-    //std::string zapros="путин & медведев";
+    //std::string zapros="(власти & (бельгии | парижа)) & !теракт";
+    std::string zapros="путин & медведев";
     //std::string zapros="путин & (медведев | (бельгии | парижа))";
     //std::string zapros="участников & митинга";
     //std::string zapros="(участников & митинга) | бренда";
@@ -384,6 +401,7 @@ int main(){
     std::chrono::steady_clock::time_point time_end_nepotok = std::chrono::steady_clock::now();
     auto duration_nepotok=std::chrono::duration_cast<std::chrono::nanoseconds> (time_end_nepotok - time_begin_nepotok).count();
     std::cout<<"duration_nepotok="<<duration_nepotok<<"ns"<<std::endl;
+    //std::cout<<res.size()<<std::endl;
     
     
     std::chrono::steady_clock::time_point time_begin_potok = std::chrono::steady_clock::now();
@@ -391,11 +409,13 @@ int main(){
     std::chrono::steady_clock::time_point time_end_potok = std::chrono::steady_clock::now();
     auto duration_potok=std::chrono::duration_cast<std::chrono::nanoseconds> (time_end_potok - time_begin_potok).count();
     std::cout<<"duration_potok="<<duration_potok<<"ns"<<std::endl;
+    //std::cout<<res.size()<<std::endl;
     
     
     std::cout<<zapros<<std::endl;
     std::cout<<res.size()<<std::endl;
     for (auto el:res){
+        //std::cout<<el<<std::endl;
 	    std::cout<<my_doc_id2url[el]<<std::endl;
     }
     

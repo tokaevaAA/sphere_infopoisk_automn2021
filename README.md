@@ -1,2 +1,0 @@
-# sphere_infopoisk_automn2021
-for sphere_infopoisk_automn2021
